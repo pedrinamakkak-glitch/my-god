@@ -10,11 +10,22 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Descompactar e Buildar
+    - name: Find and Build APK
       run: |
-        # Descompacta o zip do projeto
-        unzip -q meu-virus.zip -d projeto_descompactado
-        cd projeto_descompactado/meu-virus
+        echo "Iniciando busca..."
+        # Se tiver algum arquivo zip na raiz, descompacta
+        if ls *.zip 1> /dev/null 2>&1; then
+          echo "Zip encontrado! Descompactando..."
+          unzip -q *.zip -d projeto_descompactado
+          cd projeto_descompactado
+        fi
+        
+        # Procura a pasta onde tá o settings.gradle.kts
+        FILE=$(find . -name "settings.gradle.kts" | head -n 1)
+        DIR=$(dirname "$FILE")
+        echo "Projeto encontrado na pasta: $DIR"
+        cd "$DIR"
+        
         # Compila
         gradle wrapper
         ./gradlew assembleDebug
@@ -22,4 +33,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: projeto_descompactado/meu-virus/app/build/outputs/apk/debug/app-debug.apk
+        # Esse asterisco duplo procura o apk em qualquer subpasta
+        path: "**/app-debug.apk"
