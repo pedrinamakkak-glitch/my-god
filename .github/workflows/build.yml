@@ -5,33 +5,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+        
     - name: Find and Build APK
       run: |
         echo "Iniciando busca..."
-        # Se tiver algum arquivo zip na raiz, descompacta
         if ls *.zip 1> /dev/null 2>&1; then
           echo "Zip encontrado! Descompactando..."
           unzip -q *.zip -d projeto_descompactado
           cd projeto_descompactado
         fi
         
-        # Procura a pasta onde tá o settings.gradle.kts
         FILE=$(find . -name "settings.gradle.kts" | head -n 1)
         DIR=$(dirname "$FILE")
         echo "Projeto encontrado na pasta: $DIR"
         cd "$DIR"
         
-        # Compila
         gradle wrapper
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --stacktrace
+        
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        # Esse asterisco duplo procura o apk em qualquer subpasta
         path: "**/app-debug.apk"
