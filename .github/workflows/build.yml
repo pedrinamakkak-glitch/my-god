@@ -14,16 +14,13 @@ jobs:
         
     - name: Build APK
       run: |
-        # Procura a pasta do projeto
         FILE=$(find . -name "settings.gradle.kts" | head -n 1)
         DIR=$(dirname "$FILE")
         echo "Entrando na pasta: $DIR"
         cd "$DIR"
         
-        # Dá permissão de execução pro gradlew e roda
-        chmod +x gradlew || true
-        gradle wrapper
-        ./gradlew assembleDebug
+        # Usa o gradle global em vez do ./gradlew
+        gradle assembleDebug
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
